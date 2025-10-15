@@ -363,7 +363,7 @@ export const SubBlogPage = () => {
         {/* Article Content */}
         <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none mb-8 sm:mb-12">
           <div
-            className="text-gray-700 leading-relaxed text-sm sm:text-base"
+            className="blog-content text-gray-700 leading-relaxed text-sm sm:text-base"
             dangerouslySetInnerHTML={{ __html: blog.html_content }}
           />
         </div>
