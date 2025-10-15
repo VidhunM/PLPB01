@@ -196,3 +196,32 @@ body{
     -webkit-line-clamp: 3;
   }
 }
+
+/* Custom styles for blog content */
+.blog-content {
+  /* Ensure bold text is clearly visible */
+  b, strong {
+    font-weight: 700 !important;
+    color: inherit;
+  }
+  
+  /* Style hyperlinks to appear blue */
+  a {
+    color: #2563eb !important; /* Blue color */
+    text-decoration: underline;
+  }
+  
+  a:hover {
+    color: #1d4ed8 !important; /* Darker blue on hover */
+  }
+  
+  /* Ensure proper font inheritance for all elements */
+  * {
+    font-family: inherit;
+  }
+  
+  /* Make sure headings have proper weight */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+  }
+}
