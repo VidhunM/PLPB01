@@ -26,15 +26,14 @@ interface ApiResponse {
   data: ApiBlog[];
 }
 
-
 const categories = [
   "All",
   "Investment Insights",
-  "Industry Trends", 
+  "Industry Trends",
   "Spaces & Design",
   "Leadership Voices",
   "Our Impact",
-  "Guides & Resources"
+  "Guides & Resources",
 ];
 
 export const BlogPage = () => {
@@ -52,22 +51,24 @@ export const BlogPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('https://plpb-backend.onrender.com/api/blogs');
-        
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/blogs`
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data: ApiResponse = await response.json();
-        
+
         if (data.success && data.data && Array.isArray(data.data)) {
           setBlogs(data.data);
         } else {
-          setError('No blogs available at the moment');
+          setError("No blogs available at the moment");
         }
       } catch (err) {
-        console.error('Error fetching blogs:', err);
-        setError('Failed to load blogs. Please try again later.');
+        console.error("Error fetching blogs:", err);
+        setError("Failed to load blogs. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -77,10 +78,18 @@ export const BlogPage = () => {
   }, []);
 
   // Filter blogs based on category and search term
-  const filteredBlogs = blogs.filter(blog => {
-    const matchesCategory = selectedCategory === "All" || blog.category === selectedCategory;
-    const matchesSearch = blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         blog.description.toLowerCase().includes(searchTerm.toLowerCase());
+  const sortedBlogs = blogs
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  const filteredBlogs = sortedBlogs.filter((blog) => {
+    const matchesCategory =
+      selectedCategory === "All" || blog.category === selectedCategory;
+    const matchesSearch =
+      blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      blog.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -89,6 +98,13 @@ export const BlogPage = () => {
   const startIndex = (currentPage - 1) * postsPerPage;
   const endIndex = startIndex + postsPerPage;
   const currentBlogs = filteredBlogs.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
@@ -103,8 +119,10 @@ export const BlogPage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative h-[300px] sm:h-[400px] bg-cover bg-center bg-no-repeat" 
-           style={{ backgroundImage: "url('/assets/Images/Blog.png')" }}>
+      <div
+        className="relative h-[300px] sm:h-[400px] bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/assets/Images/Blog.png')" }}
+      >
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
 
@@ -114,10 +132,15 @@ export const BlogPage = () => {
         <div className="mb-12">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
             <div className="mb-6 lg:mb-0">
-              <h2 className="text-2xl sm:text-3xl font-medium text-gray-700 mb-3">Browse by categories</h2>
-              <div className="w-32 h-0.5" style={{ backgroundColor: '#78602C' }}></div>
+              <h2 className="text-2xl sm:text-3xl font-medium text-gray-700 mb-3">
+                Browse by categories
+              </h2>
+              <div
+                className="w-32 h-0.5"
+                style={{ backgroundColor: "#78602C" }}
+              ></div>
             </div>
-            
+
             {/* Search Bar */}
             <div className="relative w-full sm:w-auto">
               <input
@@ -126,34 +149,39 @@ export const BlogPage = () => {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 className="w-full sm:w-80 px-4 py-3 pr-12 border focus:outline-none focus:ring-1 focus:ring-[#78602C] focus:border-[#78602C] text-base"
-                style={{ borderColor: '#78602C', backgroundColor: 'white' }}
+                style={{ borderColor: "#78602C", backgroundColor: "white" }}
               />
-              <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#78602C' }} />
+              <Search
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5"
+                style={{ color: "#78602C" }}
+              />
             </div>
           </div>
 
           {/* Category Tabs */}
-          <div className="border mb-8 max-w-7xl mx-auto" style={{ borderColor: '#8B7B5B', backgroundColor: '#F8F8F8' }}>
-            {/* Mobile: Horizontal scroll with chips */}
+          <div
+            className="border mb-8 max-w-7xl mx-auto"
+            style={{ borderColor: "#8B7B5B", backgroundColor: "#F8F8F8" }}
+          >
+            {/* Mobile: Dropdown select */}
             <div className="sm:hidden py-3 px-4">
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {categories.map((category, index) => (
-                  <button
-                    key={category}
-                    onClick={() => handleCategoryChange(category)}
-                    className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium text-black hover:bg-gray-100 transition-colors duration-200 whitespace-nowrap"
-                    style={{ 
-                      backgroundColor: selectedCategory === category ? '#8B7B5B' : 'white',
-                      color: selectedCategory === category ? 'white' : 'black',
-                      border: '1px solid #8B7B5B'
-                    }}
-                  >
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Categories
+              </label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                className="w-full border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#8B7B5B] focus:border-[#8B7B5B]"
+                style={{ borderColor: "#8B7B5B", backgroundColor: "white" }}
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>
                     {category}
-                  </button>
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
-            
+
             {/* Desktop: Flex layout */}
             <div className="hidden sm:flex relative py-2">
               {categories.map((category, index) => (
@@ -168,12 +196,12 @@ export const BlogPage = () => {
               ))}
               {/* Vertical separators */}
               {categories.slice(0, -1).map((_, index) => (
-                <div 
+                <div
                   key={`separator-${index}`}
-                  className="absolute top-3 w-px bottom-3" 
-                  style={{ 
-                    backgroundColor: '#D3D3D3',
-                    left: `${((index + 1) * 100) / categories.length}%`
+                  className="absolute top-3 w-px bottom-3"
+                  style={{
+                    backgroundColor: "#D3D3D3",
+                    left: `${((index + 1) * 100) / categories.length}%`,
                   }}
                 ></div>
               ))}
@@ -198,22 +226,22 @@ export const BlogPage = () => {
           {!loading && !error && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12 justify-items-center">
               {currentBlogs.map((blog) => (
-                <BlogCard 
-                  key={blog._id} 
+                <BlogCard
+                  key={blog._id}
                   blog={{
                     // id: parseInt(blog._id.slice(-6), 16), // Convert _id to number for compatibility
                     id: blog._id,
                     title: blog.title,
                     category: blog.category,
-                    date: new Date(blog.createdAt).toLocaleDateString('en-GB', { 
-                      day: '2-digit', 
-                      month: 'short', 
-                      year: 'numeric' 
+                    date: new Date(blog.createdAt).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
                     }),
                     description: blog.description,
                     image: blog.image_url,
-                    readMore: `/subblog/${createSlug(blog.title)}`
-                  }} 
+                    readMore: `/subblog/${createSlug(blog.title)}`,
+                  }}
                 />
               ))}
             </div>
@@ -222,7 +250,9 @@ export const BlogPage = () => {
           {/* No Results Message */}
           {!loading && !error && currentBlogs.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No blog posts found matching your criteria.</p>
+              <p className="text-gray-500 text-lg">
+                No blog posts found matching your criteria.
+              </p>
             </div>
           )}
 
@@ -231,7 +261,7 @@ export const BlogPage = () => {
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
-              onPageChange={setCurrentPage}
+              onPageChange={handlePageChange}
             />
           )}
         </div>
@@ -239,4 +269,3 @@ export const BlogPage = () => {
     </div>
   );
 };
-
